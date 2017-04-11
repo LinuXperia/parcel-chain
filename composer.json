@@ -1,7 +1,7 @@
 {
   "name": "parcel/chain",
   "description": "This component adds the ability to send a dispatcher down a chain of nodes.",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "homepage": "http://www.parcel-framework.com",
   "autoload": {
     "psr-0": { "Parcel\\Chain\\": "src/" },
