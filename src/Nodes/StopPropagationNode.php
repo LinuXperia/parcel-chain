@@ -6,16 +6,16 @@ use Parcel\Chain\DispatchInterface;
 use Parcel\Chain\NodeBase;
 
 /**
- * Class StopPropagatingNode
+ * Class StopPropagationNode
  *
  * @author Chris Butcher
  * @package Parcel\Chain\Nodes
  * @version 0.1.0
  */
-class StopPropagatingNode extends NodeBase {
+class StopPropagationNode extends NodeBase {
 
 	/**
-	 * StopPropagatingNode constructor.
+	 * StopPropagationNode constructor.
 	 *
 	 * @param array $Input
 	 */
