@@ -2,6 +2,13 @@
 
 namespace Parcel\Chain;
 
+/**
+ * Class Chain
+ *
+ * @author Chris Butcher
+ * @package Parcel\Chain
+ * @version 0.1.0
+ */
 class Chain implements ChainInterface {
 
 	/**
