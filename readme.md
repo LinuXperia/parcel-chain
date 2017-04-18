@@ -2,11 +2,9 @@
 The chain component allows users to build a chain reaction using modular nodes.
 
 ## Simple Explanation of Flow Based Programming
-For this example, we are going to imagine a package delivery service, like UPS or FedEx.
-The delivery driver (dispatcher) travels to different facilities (nodes), dropping off
-and picking up packages (variables).
-
-What the nodes do with those packages, is completely up to them.
+Imagine a package delivery service, like UPS or FedEx. The delivery driver (dispatcher)
+travels to different facilities (nodes), dropping off and picking up packages (variables).
+What the nodes do when they get those packages, is completely up to them.
 
 ## Initialization and Basic Execution
 ```$php
@@ -35,69 +33,63 @@ $Chain->Execute($Dispatch);
 ```
 
 ## Creating a Node
+
+Nodes are mean to be re-usable and stateless black boxes that have a single
+responsibility, such as sending an email, writing text to a file, or connecting
+to a database. For our example, we are going to create a simple node that lets
+us send an email.
+
+When adding a node to the chain, it needs to have the proper interface to work
+correctly. So you'll need to make sure your node extends `Parcel\Chain\NodeBase`,
+which has an abstract `Execute` method that we'll put our nodes logic will go into.
+
 ```$php
 
 <?php
  
 namespace Parcel\Chain\Nodes;
  
-use Parcel\Chain\DispatchInterface;
 use Parcel\Chain\NodeBase;
+use Parcel\Chain\DispatchInterface;
  
-class AddStringNode extends NodeBase {
- 
-    /**
-     * This is the key under which the value will be placed within the dispatcher.
-     *
-     * @var string
-     */
-    protected $Key;
-
-    /**
-     * The string that will be placed within the dispatcher.
-     *
-     * @var string
-     */
-    protected $Value;
+class SendEmailNode extends NodeBase {
  
     /**
-     * The constructor is where we initialize our node. This will include supplying
-     * any data that our node needs to execute correctly.
-     * 
-     * In this example we are supplying the Key, which is the name of the variable that
-     * we will set in the dispathcer, and the Value, which is  the string that will
-     * be stored in the dispatcher.
-     */
-    public function __construct(array $Input = []) {
- 
-        if (!isset($Input['Key'])) {
-            $Input['Key'] = 'String';
-        }
- 
-        if (!isset($Input['Value'])) {
-            $Input['Value'] = '';
-        }
- 
-        $this->Key = $Input['Key'];
- 
-        if (is_string($Input['Value'])) {
-            $this->Value = $Input['Value'];
- 
-        } else if (is_object($Input['Value']) && method_exists($Input['Value'], '__toString')) {
-            $this->Value = (string) $Input['Value'];
- 
-        } else {
-            $this->Value = '';
-        }
-	}
- 
-    /**
-     * When the node is executed, this will place the value into the dispatcher
-     * under the supplied key name.
+     * Execute the node by looking up the emails required values
+     * and then sending an email using the mail() command.
      */
     public  function Execute(DispatchInterface &$Dispatch) {
-        $Dispatch->Set($this->Key, $this->Value);
+    
+        $To = $Dispatch->Get('To');
+        $From = $Dispatch->Get('From');
+        $ReplyTo = $Dispatch->Get('ReplyTo');
+        $Subject = $Dispatch->Get('Subject');
+        $Body = $Dispatch->Get('Body');
+        
+        $Headers = [
+            "To: {$To}",
+            "From: {$From}",
+            "Reply-To: {$ReplyTo}",
+            "MIME-Version: 1.0",
+            "Content-type: text/html"
+        ];
+        
+        if (!mail($To, $Subject, $Body, $Headers) ) {
+            throw new \Exception("Unable to send the email.");
+        }
     }
 }
 
 ```
+
+The first thing you'll notice in our `Execute` method, is that we are retrieving
+our email configuration variables from our dispatcher. Those variables will have
+either been added by other nodes, or the dispatcher would have been initialized
+with them.
+ 
+After we compile our mail headers, in an attempt to make sure that we get past
+any spam filters, we attempt to send the email which upon failure will throw
+an exception.
+ 
+Yepp, that's really all there is to it. You just need to create a single method
+that serves a single purpose.
